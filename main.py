@@ -43,50 +43,55 @@ def append_to_buffer(buffer, size_of_buffer, value):
     return buffer
 
 
-def main():
-    
+def open_mic_stream(rate, chunk):
+    audio = pyaudio.PyAudio()
+    stream = audio.open(format=pyaudio.paInt16,
+                    channels=1,
+                    rate=rate,
+                    input=True,
+                    frames_per_buffer=chunk)
+    return audio, stream
 
+
+def close_mic_stream(audio, stream):
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+
+
+def print_terminal_visualization(value):
+    if value == 0:
+        print('.')
+    else:
+        print('#' * value)
+
+
+def main():
     CHUNK = 2**11
     RATE = 44100
-
-    p=pyaudio.PyAudio()
-    stream=p.open(format=pyaudio.paInt16,channels=1,rate=RATE,input=True,
-                frames_per_buffer=CHUNK)
-
-
-
-    numbers = []
+    
+    values = []
     size_of_numbers = 10
-    i = 0
+
+    audio, stream = open_mic_stream(RATE, CHUNK)
+    code_bug = codebug.CodeBug()
     try:
         while True:
-            code_bug = codebug.CodeBug()
             code_bug.clear_screen()
             
-            #for i in range(int(10*44100/1024)): #go for a few seconds
-            data = np.fromstring(stream.read(CHUNK),dtype=np.int16)
-            peak=np.average(np.abs(data))*2
-            tmp = int(50*peak/2**16)
-            bars="#"*tmp
-            print("%04d %05d %s"%(i,peak,bars))
-            i += 1
+            data = np.fromstring(stream.read(CHUNK), dtype=np.int16)
+            peak = np.average(np.abs(data))*2
+            value = int(15 * peak / 2**16)
             
-            numbers = append_to_buffer(numbers, size_of_numbers, tmp)
-            print(tmp)
-
-            bars = get_bars(numbers)[:5]
-            print(bars)
+            values = append_to_buffer(values, size_of_numbers, value)
+            bars = get_bars(values)[:5]
             
+            print_terminal_visualization(value)
             code_bug.set_screen(bars)
-            
-
     except KeyboardInterrupt:
         pass
     finally:
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-
+        close_mic_stream(audio, stream)
 
     
 
