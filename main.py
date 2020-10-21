@@ -57,27 +57,29 @@ def main():
 
     numbers = []
     size_of_numbers = 10
-
+    i = 0
     try:
         while True:
             code_bug = codebug.CodeBug()
             code_bug.clear_screen()
             
-            random_number = generate_random_number(0, 5)
-            numbers = append_to_buffer(numbers, size_of_numbers, random_number)
-            print(numbers)
-
-            for i in range(int(10*44100/1024)): #go for a few seconds
-                data = np.fromstring(stream.read(CHUNK),dtype=np.int16)
-                peak=np.average(np.abs(data))*2
-                bars="#"*int(50*peak/2**16)
-                print("%04d %05d %s"%(i,peak,bars))
+            #for i in range(int(10*44100/1024)): #go for a few seconds
+            data = np.fromstring(stream.read(CHUNK),dtype=np.int16)
+            peak=np.average(np.abs(data))*2
+            tmp = int(50*peak/2**16)
+            bars="#"*tmp
+            print("%04d %05d %s"%(i,peak,bars))
+            i += 1
+            
+            numbers = append_to_buffer(numbers, size_of_numbers, tmp)
+            print(tmp)
 
             bars = get_bars(numbers)[:5]
             print(bars)
             
             code_bug.set_screen(bars)
-            time.sleep(0.1)
+            
+
     except KeyboardInterrupt:
         pass
     finally:
