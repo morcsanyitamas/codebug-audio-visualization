@@ -81,7 +81,7 @@ def main():
             
             data = np.fromstring(stream.read(CHUNK), dtype=np.int16)
             peak = np.average(np.abs(data))*2
-            value = int(15 * peak / 2**16)
+            value = int(20 * peak / 2**16)
             
             values = append_to_buffer(values, size_of_numbers, value)
             bars = get_bars(values)[:5]
